@@ -1,0 +1,77 @@
+main.c:
+  parameters: none
+  output: current directory printed to command line
+  Implementation:
+    initializes environment variables. Creates a while true loop which
+    prints out the current directory to screen, reads user input,
+    prints user input to screen, then parses input by whitespace,
+    searching for commands. There will be a switch statement that
+    calls shell functions based upon user input.
+
+cd:
+  parameters: 
+  output: 
+  Implementation:
+    
+clr:
+  parameters: 
+  output: 
+  Implementation:
+    
+dir:
+  parameters: 
+  output: 
+  Implementation:
+    
+environ:
+  parameters: 
+  output: 
+  Implementation:
+    
+echo:
+  parameters: 
+  output: 
+  Implementation:
+    
+help:
+  parameters: 
+  output: 
+  Implementation:
+    
+quit:
+  parameters: 
+  output: 
+  Implementation:
+    
+<:
+  parameters: 
+  output: 
+  Implementation:
+    
+>:
+  parameters: 
+  output: 
+  Implementation:
+    
+>>:
+  parameters: 
+  output: 
+  Implementation:
+    
+|:
+  parameters: 
+  output: 
+  Implementation:
+    
+&:
+  parameters: none
+  output: none
+  Implementation:
+    flag that determines whether wait is called in main when execvp is called.
+    
+program invocations:
+  parameters: argv
+  output: dependant on the program called
+  Implementation:
+    parent process is forked, set up argv by passed in params, add null to final
+    element of argv. Execvp is called, passing in path to file and argv
