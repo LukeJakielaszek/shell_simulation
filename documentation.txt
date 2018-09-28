@@ -4,6 +4,24 @@
 int runBackground = 0
 int savedStdOut = 0
 
+// node struct to store a single string
+node:
+	- node next
+	- char * command
+	
+// linked list struct to store individual whitespace seperated strings
+linkedList:
+	- node root
+	- node tail
+	- int size
+	- linkedList next
+
+// doubly linked list struct to store entire sequences of commands seperated by pipes
+doubleLinkedList:
+	- linkedList root
+	- linkedList tail
+	- int size
+
 // an infinite loop that processes user commands to simulate a shell
 main:
 	- retrieves a copy of linux environment.
@@ -37,19 +55,19 @@ firstCommand(userInputList):
 pipingRec(userInputList):
 	- set up pipe using global READ and WRITE constants
 	- check if pipe was successfully created
-	- store first index of linked list into a tempList.
+	- store first index of the two-dimensional userInputList into a one-dimensional tempList.
 	- Remove first index of userInputList
 	- call a fork
 	- check for successful fork
 	- if the parent
 	  - close the read portion of the pipe
-	  - copy write portion of pipe to std_out using dup2
+	  - copy write portion of pipe to std_out using the dup2 system call
 	  - call processCommand function to process tempList command
 	- if the child
 	  - close the write portion of the pipe
 	  - copy read portion of pipe to std_in using dup2
 	  - if the next index of userInputList is not null, recursively call piping function and pass in shortened userInputList,
-	    otherwise set the std_out to the global savedStdOut variable and call the processCommand function to process the final index
+	    otherwise set the std_out to the global savedStdOut variable (terminal) and call the processCommand function to process the final index
 	    of the userInputList. (this allows the final command in the string to print its output to the terminal)
 
 // performs redirects and executes functions/executable programs
@@ -58,13 +76,14 @@ processCommand(userCommand):
 	- if userCommand has ">" or ">>" set the standard output to the specified file for the command using dup
 	- if userCommand is a builtIn function
 	  - call the builtIn function (dir, environ, echo, help)
-	- if userCommand is a executable program
+	- if userCommand is an executable program
 	  - set up argv for the command
 	  - call the exec command
 	  - if exec fails, exit with failure status
 
 // prints the contents of the help file
 help:
+	read the contents of the help file.
 	print the help file contents to std_out.
 
 // prints some input string
@@ -121,4 +140,3 @@ cd(dir_path):
 // clears the screen
 clr():
 	- prints a series of newlines to the screen.
-
