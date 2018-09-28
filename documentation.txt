@@ -1,80 +1,124 @@
+//global variables for piping and background
+#define READ 0
+#define WRITE 1
+int runBackground = 0
+int savedStdOut = 0
 
+// an infinite loop that processes user commands to simulate a shell
+main:
+	- retrieves a copy of linux environment.
+	- sets input stream if user passes a file path, otherwise defaults to terminal
+	- while true loop
+	  - prints PWD from environ
+	  - reads line from input stream
+	  - checks if newline is entered, if so, coninues on next iteration of loop
+	  - parses user input into a doubly linked list calling parseInput function
+	  - check if input is in a valid format by calling isValidInput, if not valid, continue is called.
+	  - check if an & is at the end of the userInputList. If so, set global runBackground flag to 1, else set to 0.
+	  - check for "exit" at start of the usrInputList. If so, exit.
+	  - check if cd is at the start of the userInputList. If so, call the cd function which alters the PWD environment variable.
+	  - check if clr command is at the start of the userInputList. If so, call the clr function, which prints newlines to screen.
+	  - Call firstCommand function, this will process the first command of the userInputList, then call the
+	    recursive piping function for the rest.
 
+// splits the main process from the user commands, if piping is used at all, calls pipingRec. Otherwise calls processCommand. Also determines
+   any background running
+firstCommand(userInputList):
+	- call a fork to seperate from the main process
+	- check if fork was successful
+	- if parent
+	  - if runBackground is 1, return without waiting, else call wait
+	- if child
+	  - set global savedStdOut variable to current std_out using dup system call
+	  - if userInputList size is larger than 1, call pipingRec function to recursively process the pipes.
+	  - if userInputList size is 1, call processCommand function to process the only command in the list
+	
+// recursively sets up piping for program
+pipingRec(userInputList):
+	- set up pipe using global READ and WRITE constants
+	- check if pipe was successfully created
+	- store first index of linked list into a tempList.
+	- Remove first index of userInputList
+	- call a fork
+	- check for successful fork
+	- if the parent
+	  - close the read portion of the pipe
+	  - copy write portion of pipe to std_out using dup2
+	  - call processCommand function to process tempList command
+	- if the child
+	  - close the write portion of the pipe
+	  - copy read portion of pipe to std_in using dup2
+	  - if the next index of userInputList is not null, recursively call piping function and pass in shortened userInputList,
+	    otherwise set the std_out to the global savedStdOut variable and call the processCommand function to process the final index
+	    of the userInputList. (this allows the final command in the string to print its output to the terminal)
 
-main.c:
-  parameters: none
-  output: current directory printed to command line
-  Implementation:
-    initializes environment variables. Creates a while true loop which
-    prints out the current directory to screen, reads user input,
-    prints user input to screen, then parses input by whitespace,
-    searching for commands. There will be a switch statement that
-    calls shell functions based upon user input.
+// performs redirects and executes functions/executable programs
+processCommand(userCommand):
+	- if userCommand has "<", set the standard input to the specified file for the command using dup
+	- if userCommand has ">" or ">>" set the standard output to the specified file for the command using dup
+	- if userCommand is a builtIn function
+	  - call the builtIn function (dir, environ, echo, help)
+	- if userCommand is a executable program
+	  - set up argv for the command
+	  - call the exec command
+	  - if exec fails, exit with failure status
 
-cd:
-  parameters: 
-  output: 
-  Implementation:
-    
-clr:
-  parameters: 
-  output: 
-  Implementation:
-    
-dir:
-  parameters: 
-  output: 
-  Implementation:
-    
-environ:
-  parameters: 
-  output: 
-  Implementation:
-    
-echo:
-  parameters: 
-  output: 
-  Implementation:
-    
+// prints the contents of the help file
 help:
-  parameters: 
-  output: 
-  Implementation:
-    
-quit:
-  parameters: 
-  output: 
-  Implementation:
-    
-<:
-  parameters: 
-  output: 
-  Implementation:
-    
->:
-  parameters: 
-  output: 
-  Implementation:
-    
->>:
-  parameters: 
-  output: 
-  Implementation:
-    
-|:
-  parameters: 
-  output: 
-  Implementation:
-    
-&:
-  parameters: none
-  output: none
-  Implementation:
-    flag that determines whether wait is called in main when execvp is called.
-    
-program invocations:
-  parameters: argv
-  output: dependant on the program called
-  Implementation:
-    parent process is forked, set up argv by passed in params, add null to final
-    element of argv. Execvp is called, passing in path to file and argv
+	print the help file contents to std_out.
+
+// prints some input string
+echo(someString):
+	print someString to std_out
+
+// prints the environment variables
+environ:
+	print the environment string to std_out
+
+// list the contents of the specified directory
+dir(path):
+	- call checkValidPath to ensure path is valid
+	- use dirent.h library to print the contents of the desired directory to std_out
+
+// checks if user input has valid formatting according to linux command structures
+isValidInput(userInputList):
+	- valid input flag is defaulted to true
+	- ensures that the < command occurs only at the first index of the linked list and that their is only one occurence
+	- ensures that the > and >> commands occur only at the final index of the linked list and that their is only one occurence
+	- ensures that the < command comes before > or >> commands
+	    "prog > out.txt < in.txt" is invalid
+	- ensures that if the > or >> or < commands are used in the list, then at least one non-redirect item must occur before and
+	  after.
+            "> out.txt" , "prog >" and "prog > < out.txt" are invalid but "prog > out.txt" is valid
+	- if any of the above conditions fail, valid input flag is set to false and is returned immediately.
+	- returns valid input flag
+
+// parses user input into a doubly linked list
+parseInput(userInput):
+	- instantiate a doubly linked list.
+	- Seperate userInput by whitespace and piping. Each index of the linked list will hold seperate pipe
+	  commands. Each sub-index will hold whitespace seperated sub-commands 
+	    For example:
+	      "hello > out.txt | home < in.txt | hiya"
+	      linked_list[0][0] == "hello"
+	      linked_list[0][1] == ">"
+	      linked_list[0][2] == "out.txt"
+	      linked_list[1][0] == "home"
+	      ...
+	- return linked list
+
+// checks if a path exists
+checkValidPath(path):
+	- walk through PATH environment variable, checking if the passed in file/dir path actually exists.
+	- return true if exists, false otherwise.
+
+// changes PWD environment variable
+cd(dir_path):
+	- check if path is valid using checkValidPath(dir_path)
+	- if valid, append dir_path to PWD environment variable
+	- otherwise return
+
+// clears the screen
+clr():
+	- prints a series of newlines to the screen.
+
