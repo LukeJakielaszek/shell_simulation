@@ -38,7 +38,7 @@ char * readLine(){
   return buffer;
 }
 
-// parse an entire line of user input by pipes
+// parse an entire line of user input into pipe sections
 void parseLine(char * inputLine){
   // gets length of input
   int lineLen = strlen(inputLine);
@@ -61,27 +61,34 @@ void parseLine(char * inputLine){
   token = strtok(inputLine, delim);
 
   llist1 * pipList = makeList1();
-  
+
+  int size = 0;
   // tokenize the rest of the line
   while(token != NULL){
     // appends each pipe-seperated string to a temp list
     append1(pipList, token);
+
+    size++;
     
     // get next token
     token = strtok(NULL, delim);
   }
 
+  // parses each pipe section, splitting by whitespace
   int i = 0;
-  for(i = 0; i < pipList->size; i++){
+  for(i = 0; i < size; i++){
     printf("Segment %d\n", i);
     parsePipe(get1(pipList, i));
   }
 }
 
+// parses pipe section by whitespace
 void parsePipe(char * pipeSeg){
   int i = 0;
+  
+  // gets length of pipe string section
   int pipLen = strlen(pipeSeg);
-
+  
   // converts all tabs to spaces
   for(i = 0; i<pipLen; i++){
     if(isTab(pipeSeg[i])){
@@ -94,7 +101,6 @@ void parsePipe(char * pipeSeg){
   const char delim[2] = " ";
 
   char * token;
-
 
   // grab first token
   token = strtok(pipeSeg, delim);
