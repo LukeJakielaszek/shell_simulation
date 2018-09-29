@@ -10,8 +10,22 @@ typedef struct node{
 typedef struct linkedList{
   struct node * head;
   int size;
+  struct linkedList *next;
+  struct linkedList *prev;
 }linkedList;
 
+typedef struct llist2{
+  struct linkedList * head;
+  int size;
+}llist2;
+
+// two dimensional list functions
+llist2 * makeList2();
+int isEmpty2(llist2 * list);
+void printList2(llist2 * list2);
+
+
+// one dimensional list functions 
 linkedList * makeList1();
 void append1(linkedList * list, char * command);
 node * createNode(char * command);
@@ -34,7 +48,50 @@ int main(){
   
   printf("\n");
   printList1(singleList);
-  
+
+
+  llist2 * list2 = makeList2();
+
+  printf("isEmpty : %d\n", isEmpty2(list2));
+
+  printList2(list2);
+}
+
+void printList2(llist2 * list2){
+  if(isEmpty2(list2)){
+    printf("2D llist is Empty\n");
+  }else{
+    linkedList * temp = list2->head;
+    printList1(temp);
+
+    int i = 0;
+    for(i = 0; i < list2->size; i++){
+      temp=temp->next;
+      printList1(temp);
+    }
+  }
+}
+
+int isEmpty2(llist2 * list){
+  return list->head == NULL;
+}
+
+// makes a two dimensional linked list
+llist2 * makeList2(){
+  llist2 * list;
+
+  // allocate memory for linked list
+  list = (llist2*)malloc(sizeof(llist2));
+
+  if(list == NULL){
+    printf("ERROR: Linked list 2 failed to malloc.\n");
+    exit(-1);
+  }
+
+  list->head = NULL;
+  list->size = 0;
+
+  return list;
 }
 
 int isEmpty1(linkedList * list){
@@ -121,11 +178,13 @@ linkedList * makeList1(){
   list = (linkedList*)malloc(sizeof(linkedList));
 
   if(list == NULL){
-    printf("ERROR: Linked list failed to malloc.\n");
+    printf("ERROR: Linked list 1 failed to malloc.\n");
     exit(-1);
   }
 
   list->head = NULL;
+  list->next = NULL;
+  list->prev = NULL;
   list->size = 0;
 }
 
