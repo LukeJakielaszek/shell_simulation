@@ -34,9 +34,7 @@ char * get1(llist1 * list, int index);
 char * remove1(llist1 * list, int index);
 int isEmpty1(llist1 * list);
 
-int main(){
-  llist1 * singleList = makeList1();
-  append1(singleList, "hello");
+/*int main(){
 
   append1(singleList, "world");
 
@@ -56,7 +54,7 @@ int main(){
 
   printList2(list2);
 }
-
+*/
 
 
 // prints a 2D list to std_out
