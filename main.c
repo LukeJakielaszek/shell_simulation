@@ -1,12 +1,9 @@
 #include <stdio.h>
 #include <unistd.h>
+#include "llist.h"
+#include "parsing.h"
 
-extern char *environ[];
+int main(int argc, char * argv, char **environ){
 
-int main(void){
-
-  environ[0] = "home";
-  
-  printf("%s>", environ["PATH"]);
   
 }
