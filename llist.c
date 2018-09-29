@@ -37,7 +37,7 @@ char * get1(llist1 * list, int index);
 char * remove1(llist1 * list, int index);
 int isEmpty1(llist1 * list);
 
-
+/*
 int main(){
   llist2 * list2 = makeList2();
 
@@ -64,8 +64,8 @@ int main(){
   append2(list2, list1c);
   
   printList2(list2);
-
 }
+*/
 
 // removes first 1D list
 llist1 * pop2(llist2 * list2){

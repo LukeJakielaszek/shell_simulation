@@ -5,11 +5,14 @@
 #include<stdio.h>
 #include<unistd.h>
 #include<stdlib.h>
+#include "llist.h"
 
-#define BUFSIZE 50
+#define BUFFSIZE 50
 
-void parsePipe(char * pipeSeg);
-void parseLine(char * line);
+void parsePipe(char * pipeSeg, llist1 *commandSet);
+llist2 *parseLine(char * line);
 char * readLine();
+int isTab(char c);
+int pipingIsInvalid(char * inputLine);
 
 #endif /** PARSING_H */
