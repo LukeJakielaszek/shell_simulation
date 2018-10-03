@@ -12,6 +12,7 @@ typedef struct node{
 
 typedef struct llist1{
   struct node * head;
+  struct node * tail;
   int size;
   struct llist1 *next;
   struct llist1 *prev;
@@ -19,6 +20,7 @@ typedef struct llist1{
 
 typedef struct llist2{
   struct llist1 * head;
+  struct llist1 * tail;
   int size;
 }llist2;
 
@@ -26,6 +28,8 @@ typedef struct llist2{
 llist2 * makeList2();
 int isEmpty2(llist2 * list);
 void printList2(llist2 * list2);
+void append2(llist2 * list2, llist1 * list1);
+llist1 * pop2(llist2 * list2);
 
 // one dimensional list functions 
 llist1 * makeList1();
