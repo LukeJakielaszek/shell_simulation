@@ -9,10 +9,13 @@
 
 #define BUFFSIZE 50
 
-void parsePipe(char * pipeSeg, llist1 *commandSet);
-llist2 *parseLine(char * line);
+void parsePipe(char * pipeSeg, llist1 *commandSet, int * syntaxFlag,
+	       int pipSize);
+llist2 *parseLine(char * inputLine, int * syntaxFlag);
 char * readLine();
 int isTab(char c);
 int pipingIsInvalid(char * inputLine);
+int getSize(char * buffer);
+void checkCommand(llist1 * commandSet, int * syntaxFlag, int pipSize);
 
 #endif /** PARSING_H */

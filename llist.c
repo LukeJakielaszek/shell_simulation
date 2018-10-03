@@ -37,36 +37,6 @@ char * get1(llist1 * list, int index);
 char * remove1(llist1 * list, int index);
 int isEmpty1(llist1 * list);
 
-/*
-int main(){
-  llist2 * list2 = makeList2();
-
-  printList2(list2);
-
-  llist1 * list1a = makeList1();
-
-  append1(list1a, "hello");
-
-  llist1 * list1b = makeList1();
-
-  append1(list1b, "world");
-  append1(list1b, "boy");
-  
-  append2(list2, list1a);
-
-  append2(list2, list1b);
-  
-  printList2(list2);
-
-  pop2(list2);
-
-  llist1 * list1c = makeList1();
-  append2(list2, list1c);
-  
-  printList2(list2);
-}
-*/
-
 // removes first 1D list
 llist1 * pop2(llist2 * list2){
   llist1 * retList;
