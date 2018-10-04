@@ -27,6 +27,7 @@ int isEmpty2(llist2 * list);
 void printList2(llist2 * list2);
 void append2(llist2 * list2, llist1 * list1);
 llist1 * pop2(llist2 * list2);
+llist1 * peek(llist2 * list2);
 
 // one dimensional list functions 
 llist1 * makeList1();
@@ -58,6 +59,28 @@ llist1 * pop2(llist2 * list2){
     // detaches 1D list from 2D list
     list2->head = list2->head->next;
     list2->head->prev = NULL;
+  }
+
+  // decrements 2Dlist size
+  list2->size--;
+
+  // cleanup for security
+  retList->next = NULL;
+  retList->prev = NULL;
+
+  // returns 1Dlist
+  return retList;
+}
+
+// returns pointer to first 1D list
+llist1 * peek(llist2 * list2){
+  // attempts to view first 1D list
+  if(list2->head == NULL){
+    // returns null if 2d list is empty
+    return NULL;
+  }else{
+    // returns 1D list pointer if not empty
+    return list2->head;
   }
 
   // decrements 2Dlist size

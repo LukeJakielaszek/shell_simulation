@@ -30,6 +30,7 @@ int isEmpty2(llist2 * list);
 void printList2(llist2 * list2);
 void append2(llist2 * list2, llist1 * list1);
 llist1 * pop2(llist2 * list2);
+llist1 * peek(llist2 * list2);
 
 // one dimensional list functions 
 llist1 * makeList1();

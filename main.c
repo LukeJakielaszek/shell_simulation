@@ -62,10 +62,15 @@ int main(int argc, char ** argv, char **environ){
       
       // parses user input by piping and whitespace
       llist2 * pipeSections = parseLine(inputLine, &syntaxFlag);
-
+      
       // if syntax error is detected, continues next loop iteration
       if(syntaxFlag){
 	continue;
+      }
+
+      // checks for cd
+      if(pipeSections->size == 1 ){
+	peek
       }
       
       printList2(pipeSections);

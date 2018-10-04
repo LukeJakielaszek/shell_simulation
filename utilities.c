@@ -8,6 +8,11 @@
 void redirectInput(char * newInput);
 void clearScreen(int n);
 
+// changes working directory
+void changeDirectory(){
+  
+}
+
 // clears screen by printing n newlines
 void clearScreen(int n){
   int i = 0;
