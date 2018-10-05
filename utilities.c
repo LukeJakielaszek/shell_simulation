@@ -3,14 +3,29 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <string.h>
+#include <dirent.h>
+#include <sys/types.h>
 
 // prototypes
 void redirectInput(char * newInput);
 void clearScreen(int n);
+void changeDirectory(char * PWD, const char * newDir);
 
 // changes working directory
-void changeDirectory(){
+void changeDirectory(char * PWD, const char * newDir){
+  DIR * tempDir = opendir(newDir);
+
+  if(tempDir == NULL){
+    printf("ERROR: Unable to find directory.\n");
+    return;
+  }
+
   
+  strcat(PWD, "/");
+  strcat(PWD, newDir);
+
+  closedir(tempDir);
 }
 
 // clears screen by printing n newlines

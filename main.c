@@ -70,7 +70,15 @@ int main(int argc, char ** argv, char **environ){
 
       // checks for cd
       if(pipeSections->size == 1 ){
-	peek
+	llist1 * temp = peek(pipeSections);
+	if(strcmp(get1(temp, 0), "cd") == 0){
+	  if(temp->size == 2){
+	    changeDirectory(PWD, get1(temp, 1));
+	  }else{
+	    printf("ERROR: Invalid arguments for cd.\n");
+	    continue;
+	  }
+	}
       }
       
       printList2(pipeSections);

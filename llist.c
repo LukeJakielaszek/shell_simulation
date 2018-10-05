@@ -82,16 +82,6 @@ llist1 * peek(llist2 * list2){
     // returns 1D list pointer if not empty
     return list2->head;
   }
-
-  // decrements 2Dlist size
-  list2->size--;
-
-  // cleanup for security
-  retList->next = NULL;
-  retList->prev = NULL;
-
-  // returns 1Dlist
-  return retList;
 }
 
 // appends a 1D list to the end of a 2D list
