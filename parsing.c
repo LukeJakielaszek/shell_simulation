@@ -9,7 +9,7 @@
 void parsePipe(char * pipeSeg, llist1 *commandSet, int * syntaxFlag,
 	       int pipSize, int commandLen);
 llist2 *parseLine(char * inputLine, int * syntaxFlag);
-char * readLine();
+char * readLine(int * shouldWait);
 int isTab(char c);
 int pipingIsInvalid(char * inputLine);
 int getSize(char * buffer);
@@ -17,7 +17,7 @@ void checkCommand(llist1 * commandSet, int * syntaxFlag, int pipSize,
 		  int commandLen);
 
 // reads a line from std_in
-char * readLine(){
+char * readLine(int * shouldWait){
   size_t bufferSize = BUFFSIZE;
   char * buffer = (char*)malloc(sizeof(char)*bufferSize);
 
@@ -38,7 +38,15 @@ char * readLine(){
 
   // overwrites newline
   buffer[lenRead] = '\0';
-  
+
+  // checks if program should wait
+  if(buffer[lenRead-1] == '&'){
+    // sets shouldwait to true
+    *shouldWait = 1;
+    
+    // overwrites wait char
+    buffer[lenRead] = '\0';
+  }
   // returns read line
   return buffer;
 }

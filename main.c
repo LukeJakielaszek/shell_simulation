@@ -4,6 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/wait.h>
 
 // self made libraries
 #include "llist.h"
@@ -11,6 +12,8 @@
 #include "utilities.h"
 
 int savedStdOut;
+
+void firstCommand(llist2 * userInputList, int shouldWait);
 
 int main(int argc, char ** argv, char **environ){
   // change input stream to file if requested
@@ -31,6 +34,9 @@ int main(int argc, char ** argv, char **environ){
 
   // simulation loop
   while(1){
+    // defaults program to not wait
+    int shouldWait = 0;
+    
     char *PWD = getenv("PWD");
 
     // writes PWD to terminal
@@ -38,7 +44,7 @@ int main(int argc, char ** argv, char **environ){
     write(STDOUT_FILENO, "> ", 2);
 
     // reads user input
-    char *inputLine = readLine();
+    char *inputLine = readLine(&shouldWait);
     
     // processes input
     if(strlen(inputLine) == 0){
@@ -78,12 +84,39 @@ int main(int argc, char ** argv, char **environ){
 	  }
 	}
       }
-      
-      
+
+      firstCommand(pipeSections, shouldWait);
 
       printList2(pipeSections);
     }
   }
 }
 
+// seperates process from main program
+void firstCommand(llist2 * userInputList, int shouldWait){
+  // forks process
+  pid_t pid = fork();
+  int status = 0;
 
+  if(pid == -1){
+    // checks for failed fork
+    printf("ERROR: First fork failed to fork.\n");
+    exit(EXIT_FAILURE);
+  }else if(pid == 0){
+    // child process executes commands
+
+    
+    exit(EXIT_SUCCESS);
+  }else{
+    // parent process either waits for child or immediately begins next
+    // round of user input
+    if(shouldWait){
+      pid = wait(&status);
+
+      if(pid == -1){
+	printf("ERROR: Failed to wait.\n");
+	exit(EXIT_FAILURE);
+      }
+    }
+  }
+}

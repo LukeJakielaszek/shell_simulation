@@ -12,7 +12,7 @@
 void parsePipe(char * pipeSeg, llist1 *commandSet, int * syntaxFlag,
 	       int pipSize);
 llist2 *parseLine(char * inputLine, int * syntaxFlag);
-char * readLine();
+char * readLine(int * shouldWait);
 int isTab(char c);
 int pipingIsInvalid(char * inputLine);
 int getSize(char * buffer);
