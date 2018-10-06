@@ -27,13 +27,16 @@ char * readLine(){
     exit(-1);
   }
 
+  // reads line from input stream
   if(getline(&buffer, &bufferSize, stdin) < 0){
     printf("ERROR: Hit end of file without quitting.\n");
     exit(EXIT_FAILURE);
   }
 
+  // gets size of line
   int lenRead = getSize(buffer);
-  
+
+  // overwrites newline
   buffer[lenRead] = '\0';
   
   // returns read line
@@ -195,11 +198,20 @@ void checkCommand(llist1 * commandSet, int * syntaxFlag, int pipIndex,
     char * word = get1(commandSet, i);
 
     char * nextWord;
+
     // gets next word if it exists
     if(i+1 < commandSet->size){
       nextWord = get1(commandSet, i+1);
     }else{
       nextWord = NULL;
+    }
+
+    // gets next word's next word if it exists
+    char * nextNextWord;
+    if(i+2 < commandSet->size){
+      nextNextWord = get1(commandSet, i+2);
+    }else{
+      nextNextWord = NULL;
     }
 
     // checks for redirection
@@ -219,8 +231,16 @@ void checkCommand(llist1 * commandSet, int * syntaxFlag, int pipIndex,
 	*syntaxFlag = 1;
       }
 
+      // ensures input redirect takes an additional parameter
       if(nextWord == NULL || strcmp(nextWord, ">") == 0){
 	printf("ERROR: No file detected to redirect input to.\n");
+	*syntaxFlag = 1;
+      }
+
+      // ensures input redirect doesnt take more than one parameter
+      if(nextNextWord != NULL && !(strcmp(nextNextWord, ">") == 0 ||
+				  strcmp(nextNextWord, ">>") == 0)){
+	printf("ERROR: Input redirect takes a single file.\n");
 	*syntaxFlag = 1;
       }
       
@@ -234,12 +254,27 @@ void checkCommand(llist1 * commandSet, int * syntaxFlag, int pipIndex,
 	*syntaxFlag = 1;
       }
 
+      // ensures output redirect has 1 parameter
       if(nextWord == NULL){
 	printf("ERROR: No file detected to redirect output to.\n");
 	*syntaxFlag = 1;
       }
+
+      // ensures output redirect takes a single file
+      if(nextNextWord != NULL){
+	printf("ERROR: Output redirect takes a single file.\n");
+	*syntaxFlag = 1;
+      }
     }
 
+    // checks if unpipable builtin occurs after first index
+    if((pipIndex > 0 || i > 0) && (strcmp(word, "cd") == 0 ||
+				   strcmp(word, "quit") == 0 ||
+				   strcmp(word, "clr") == 0)){
+      printf("ERROR: Built-in function cannot appear in pipe.\n");
+      *syntaxFlag = 1;
+    }
+    
     // checks if too many redirects occured
     if(redirectInFlag > 1 || redirectOutFlag > 1){
       printf("ERROR: Too many redirects detected within input.\n");

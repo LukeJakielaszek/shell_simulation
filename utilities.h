@@ -8,10 +8,12 @@
 #include <fcntl.h>
 #include <string.h>
 #include <dirent.h>
+#include <sys/types.h>
 
 // prototypes
 void redirectInput(char * newInput);
 void clearScreen(int n);
 void changeDirectory(char * PWD, const char * newDir);
+void dir(char * path);
 
 #endif /** UTILITIES_H */

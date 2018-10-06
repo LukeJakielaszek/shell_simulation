@@ -7,25 +7,61 @@
 #include <dirent.h>
 #include <sys/types.h>
 
+#define BUFSIZE 50
+
 // prototypes
 void redirectInput(char * newInput);
 void clearScreen(int n);
 void changeDirectory(char * PWD, const char * newDir);
+void dir(char * path);
+
+void dir(char * path){
+  // opens desired directory
+  DIR * dir = opendir(path);
+
+  // file descriptor of each file in directory
+  struct dirent *fd;
+
+  // checks for failed opendir
+  if(dir == NULL){
+    printf("ERROR: Directory does not exist");
+    return;
+  }
+
+  int i = 0;
+  int size = BUFSIZE;
+
+  // reads directory, append to retchar
+  while((fd = readdir(dir)) != NULL){
+    // copy filename into retchar
+    printf("[%s]\n", fd->d_name);
+  }
+
+  closedir(dir);
+}
 
 // changes working directory
 void changeDirectory(char * PWD, const char * newDir){
-  DIR * tempDir = opendir(newDir);
+  // gets absolute path
+  char * absPath = realpath(newDir, NULL);
 
-  if(tempDir == NULL){
+  // checks for success
+  if(absPath == NULL){
     printf("ERROR: Unable to find directory.\n");
     return;
   }
 
-  
-  strcat(PWD, "/");
-  strcat(PWD, newDir);
+  // changes directory
+  if(chdir(absPath) != 0){
+    printf("ERROR: Unable to find directory.\n");
+    return;
+  }
 
-  closedir(tempDir);
+  // copies new path into environment
+  strcpy(PWD, absPath);
+
+  // frees the absolute path
+  free(absPath);
 }
 
 // clears screen by printing n newlines

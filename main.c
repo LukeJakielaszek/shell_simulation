@@ -29,11 +29,9 @@ int main(int argc, char ** argv, char **environ){
     return EXIT_FAILURE;
   }
 
-  // grabs PWD environment variable
-  char *PWD = getenv("PWD");
-  
   // simulation loop
   while(1){
+    char *PWD = getenv("PWD");
 
     // writes PWD to terminal
     write(STDOUT_FILENO, PWD, strlen(PWD));
