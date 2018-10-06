@@ -45,7 +45,7 @@ char * readLine(int * shouldWait){
     *shouldWait = 1;
     
     // overwrites wait char
-    buffer[lenRead] = '\0';
+    buffer[lenRead-1] = '\0';
   }
   // returns read line
   return buffer;

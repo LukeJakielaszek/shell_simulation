@@ -19,5 +19,6 @@ void clearScreen(int n);
 void changeDirectory(char * PWD, const char * newDir);
 void dir(char * path);
 void redirectOutput(char * newInput);
+void redirectOutputCat(char * newOutput);
 
 #endif /** UTILITIES_H */

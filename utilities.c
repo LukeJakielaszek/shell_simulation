@@ -16,6 +16,7 @@ void clearScreen(int n);
 void changeDirectory(char * PWD, const char * newDir);
 void dir(char * path);
 void redirectOutput(char * newInput);
+void redirectOutputCat(char * newOutput);
 
 void dir(char * path){
   // opens desired directory
@@ -92,18 +93,36 @@ void redirectInput(char * newInput){
 }
 
 // changes the output stream of current process to specified file descriptor
-void redirectOutput(char * newInput){
+void redirectOutput(char * newOutput){
   int fd;
   
   // opens new input file, checks for success
-  if((fd = open(newInput, O_WRONLY|O_CREAT|S_IRWXU|S_IRWXG|S_IRWXO)) < 0){
-    printf("ERROR: Failed to open %s.\n", newInput);
+  if((fd = open(newOutput, O_WRONLY|O_CREAT|S_IRWXU|S_IRWXG|S_IRWXO)) < 0){
+    printf("ERROR: Failed to open %s.\n", newOutput);
     exit(EXIT_FAILURE);
   }
 
   // change input file stream, check for success
   if(dup2(fd, STDOUT_FILENO) < 0){
-    printf("ERROR: Failed to swap output stream to %s.\n", newInput);
+    printf("ERROR: Failed to swap output stream to %s.\n", newOutput);
+    exit(EXIT_FAILURE);
+  }
+}
+
+// changes the output stream of current process to specified file descriptor
+void redirectOutputCat(char * newOutput){
+  int fd;
+  
+  // opens new input file, checks for success
+  if((fd = open(newOutput, O_WRONLY|O_APPEND|O_CREAT|S_IRWXU|S_IRWXG|S_IRWXO))
+     < 0){
+    printf("ERROR: Failed to open %s.\n", newOutput);
+    exit(EXIT_FAILURE);
+  }
+
+  // change input file stream, check for success
+  if(dup2(fd, STDOUT_FILENO) < 0){
+    printf("ERROR: Failed to swap output stream to %s.\n", newOutput);
     exit(EXIT_FAILURE);
   }
 }

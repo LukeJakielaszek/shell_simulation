@@ -11,9 +11,18 @@
 #include "parsing.h"
 #include "utilities.h"
 
+// piping constants
+#define READ 0
+#define WRITE 1
+
+// holds terminal file descriptor
 int savedStdOut;
 
+// prototypes
 void firstCommand(llist2 * userInputList, int shouldWait);
+void pipingRec(llist2 * userInputList);
+void processCommand(llist1 * commandList);
+int isBuiltIn(char * command);
 
 int main(int argc, char ** argv, char **environ){
   // change input stream to file if requested
@@ -45,7 +54,7 @@ int main(int argc, char ** argv, char **environ){
 
     // reads user input
     char *inputLine = readLine(&shouldWait);
-    
+
     // processes input
     if(strlen(inputLine) == 0){
       // continues if empty string is passed
@@ -86,8 +95,6 @@ int main(int argc, char ** argv, char **environ){
       }
 
       firstCommand(pipeSections, shouldWait);
-
-      printList2(pipeSections);
     }
   }
 }
@@ -104,19 +111,155 @@ void firstCommand(llist2 * userInputList, int shouldWait){
     exit(EXIT_FAILURE);
   }else if(pid == 0){
     // child process executes commands
-
+    if(userInputList->size > 1){
+      // recursively set up pipes if at least 1 pipe exists
+      pipingRec(userInputList);
+    }else{
+      // directly process a command if no piping exists
+      processCommand(pop2(userInputList));
+    }
     
     exit(EXIT_SUCCESS);
   }else{
     // parent process either waits for child or immediately begins next
     // round of user input
     if(shouldWait){
-      pid = wait(&status);
+      pid_t temp = pid;
 
-      if(pid == -1){
-	printf("ERROR: Failed to wait.\n");
-	exit(EXIT_FAILURE);
-      }
+      // waits for the specific child to finish
+      do{
+	pid = waitpid(temp, &status, WNOHANG);
+
+	if(pid == -1){
+	  printf("ERROR: Failed to wait.\n");
+	  exit(EXIT_FAILURE);
+	}
+
+	sleep(0.5);
+      }while(pid != temp);
+      
+      printf("\nFinished waiting %d\n", pid);
     }
   }
+}
+
+// recursivley sets up piping and forking
+void pipingRec(llist2 * userInputList){
+  int fd[2];
+  pid_t pid;
+  int status = 0;
+
+  // sets up pipe
+  if(pipe(fd) == -1){
+    printf("ERROR: Failed to create pipe.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  llist1 * tempList = pop2(userInputList);
+  
+  // forks process
+  pid = fork();
+  if(pid == -1){
+    // if fork error
+    printf("ERROR: Failed to fork process.\n");
+    exit(EXIT_FAILURE);
+  }else if(pid == 0){
+    // child process
+    // closes read portion of pipe
+    if(close(fd[READ]) == -1){
+      printf("ERROR: Failed to close read portion of pipe.\n");
+      exit(EXIT_FAILURE);
+    }
+
+    // redirects output of child to pipe
+    if(dup2(fd[WRITE], STDOUT_FILENO) < 0){
+      printf("ERROR: Failed to swap output stream to pipe.\n");
+      exit(EXIT_FAILURE);
+    }
+
+    // calls command to process 1D list
+    processCommand(tempList);
+
+    // kills process if still exists
+    exit(EXIT_SUCCESS);
+  }else{
+    // parent process
+    // closes write portion of pipe
+    if(close(fd[WRITE]) == -1){
+      printf("ERROR: Failed to close write portion of pipe.\n");
+      exit(EXIT_FAILURE);
+    }
+
+    // redirects input of parent to pipe
+    if(dup2(fd[READ], STDIN_FILENO) < 0){
+      printf("ERROR: Failed to swap input stream to pipe.\n");
+      exit(EXIT_FAILURE);
+    }
+
+    pid = wait(&status);
+
+    if(pid == -1){
+      printf("ERROR: Failed to wait.\n");
+      exit(EXIT_FAILURE);
+    }
+    
+    // recursively calls piping until list is empty 
+    if(userInputList->size > 1){
+      // recursively call piping function, passing in the shortened list
+      pipingRec(userInputList);
+    }else{
+      // restore terminal output and process final command
+      // redirects output of parent to terminal
+      if(dup2(savedStdOut, STDOUT_FILENO) < 0){
+	printf("ERROR: Failed to restore output stream to terminal.\n");
+	exit(EXIT_FAILURE);
+      }
+	
+      // process final command
+      processCommand(pop2(userInputList));
+      exit(EXIT_SUCCESS);
+    }
+  }
+}
+
+// processes a single pipe's commands
+void processCommand(llist1 * commandList){
+  int i = 0;
+
+  // default to false
+  int inIndex = 0;
+  int outIndex = 0;
+  int outCatIndex = 0;
+  for(i = 0; i < commandList->size; i++){
+    // stores indices for redirects
+    if(strcmp(get1(commandList, i), ">") == 0){
+      // if an ouput redirect is detected store the index
+      outIndex = i;
+    }else if(strcmp(get1(commandList, i), ">>") == 0){
+      // if an ouput redirect is detected store the index
+      outCatIndex = i;
+    }else if(strcmp(get1(commandList, i), "<") == 0){
+      // if an ouput redirect is detected store the index
+      inIndex = i;
+    } 
+  }
+
+  // redirects output to the specified file stream
+  if(outIndex){
+    redirectOutput(get1(commandList, outIndex+1));
+  }else if(outCatIndex){
+    redirectOutputCat(get1(commandList, outCatIndex+1));
+  }
+
+  // redirects input stream to the specified file
+  if(inIndex){
+    redirectInput(get1(commandList, inIndex+1));
+  }
+  
+}
+
+// checks if a string is a pipable builtin function
+int isBuiltIn(char * command){
+  return (strcmp(command, "dir") == 0 || strcmp(command, "environ") == 0
+	  || strcmp(command, "echo") == 0 || strcmp(command, "help") == 0);
 }
