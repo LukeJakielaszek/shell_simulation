@@ -6,6 +6,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #define BUFSIZE 50
 
@@ -14,6 +15,7 @@ void redirectInput(char * newInput);
 void clearScreen(int n);
 void changeDirectory(char * PWD, const char * newDir);
 void dir(char * path);
+void redirectOutput(char * newInput);
 
 void dir(char * path){
   // opens desired directory
@@ -85,6 +87,23 @@ void redirectInput(char * newInput){
   // change input file stream, check for success
   if(dup2(fd, STDIN_FILENO) < 0){
     printf("ERROR: Failed to swap input stream to %s.\n", newInput);
+    exit(EXIT_FAILURE);
+  }
+}
+
+// changes the output stream of current process to specified file descriptor
+void redirectOutput(char * newInput){
+  int fd;
+  
+  // opens new input file, checks for success
+  if((fd = open(newInput, O_WRONLY|O_CREAT|S_IRWXU|S_IRWXG|S_IRWXO)) < 0){
+    printf("ERROR: Failed to open %s.\n", newInput);
+    exit(EXIT_FAILURE);
+  }
+
+  // change input file stream, check for success
+  if(dup2(fd, STDOUT_FILENO) < 0){
+    printf("ERROR: Failed to swap output stream to %s.\n", newInput);
     exit(EXIT_FAILURE);
   }
 }

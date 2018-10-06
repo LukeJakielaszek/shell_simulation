@@ -9,11 +9,15 @@
 #include <string.h>
 #include <dirent.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+
+#define BUFSIZE 50
 
 // prototypes
 void redirectInput(char * newInput);
 void clearScreen(int n);
 void changeDirectory(char * PWD, const char * newDir);
 void dir(char * path);
+void redirectOutput(char * newInput);
 
 #endif /** UTILITIES_H */

@@ -271,7 +271,7 @@ void checkCommand(llist1 * commandSet, int * syntaxFlag, int pipIndex,
     if((pipIndex > 0 || i > 0) && (strcmp(word, "cd") == 0 ||
 				   strcmp(word, "quit") == 0 ||
 				   strcmp(word, "clr") == 0)){
-      printf("ERROR: Built-in function cannot appear in pipe.\n");
+      printf("ERROR: Built-in function cannot appear after first index or in pipe.\n");
       *syntaxFlag = 1;
     }
     
