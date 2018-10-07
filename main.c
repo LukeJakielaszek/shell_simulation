@@ -14,6 +14,7 @@
 // piping constants
 #define READ 0
 #define WRITE 1
+#define BUFSIZE 50
 
 // holds terminal file descriptor
 int savedStdOut;
@@ -115,8 +116,14 @@ void firstCommand(llist2 * userInputList, int shouldWait){
       // recursively set up pipes if at least 1 pipe exists
       pipingRec(userInputList);
     }else{
+      // store final commandset
+      llist1 *temp = pop2(userInputList);
+
+      // free leftover 2D list
+      free(userInputList);
+      
       // directly process a command if no piping exists
-      processCommand(pop2(userInputList));
+      processCommand(temp);
     }
     
     exit(EXIT_SUCCESS);
@@ -214,9 +221,19 @@ void pipingRec(llist2 * userInputList){
 	printf("ERROR: Failed to restore output stream to terminal.\n");
 	exit(EXIT_FAILURE);
       }
-	
+
+      // get final command
+      llist1 *temp = pop2(userInputList);
+
+      // free leftover 2D list
+      free(userInputList);
+      
       // process final command
-      processCommand(pop2(userInputList));
+      processCommand(temp);
+
+      // frees final section of list
+      free(userInputList);
+      
       exit(EXIT_SUCCESS);
     }
   }
@@ -224,13 +241,18 @@ void pipingRec(llist2 * userInputList){
 
 // processes a single pipe's commands
 void processCommand(llist1 * commandList){
+  printList1(commandList);
+  
   int i = 0;
 
-  // default to false
+  //store size
+  int end = commandList->size;
+  
+  // default trackers to false
   int inIndex = 0;
   int outIndex = 0;
   int outCatIndex = 0;
-  for(i = 0; i < commandList->size; i++){
+  for(i = 0; i < end; i++){
     // stores indices for redirects
     if(strcmp(get1(commandList, i), ">") == 0){
       // if an ouput redirect is detected store the index
@@ -255,7 +277,65 @@ void processCommand(llist1 * commandList){
   if(inIndex){
     redirectInput(get1(commandList, inIndex+1));
   }
+
+  // finds where argv for executables ends
+  if(end-1 > outIndex && outIndex > 0){
+    end = outIndex;
+  }else if (end-1 > outCatIndex && outCatIndex > 0){
+    end = outCatIndex;
+  }else if(end-1 > inIndex && inIndex > 0){
+    end = inIndex;
+  }
+
+  // mallocs argv
+  char ** argv = (char **)malloc(sizeof(char*)*end+1);
+
+  // checks for failure
+  if(argv == NULL){
+    printf("ERROR: Failed to malloc argv.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  // gets argv
+  for(i = 0; i < end; i++){
+    argv[i] = get1(commandList, i);
+  }
+
+  // set final index of argv to NULL
+  argv[end] = NULL;
+
+  // runs command
+  if(strcmp(argv[0], "dir") == 0){
+    // command is builtin dir function
+    printf("dir\n");
+  }else if(strcmp(argv[0], "environ") == 0){
+    // command is builtin environ function
+    printf("envrion\n");
+  }else  if(strcmp(argv[0], "echo") == 0){
+    // command is builtin echo function
+    printf("echo\n");
+  }else  if(strcmp(argv[0], "help") == 0){
+    // command is builtin help function
+    printf("help\n");
+  }else{
+    // the program is an executable
+    execvp(argv[0], argv);
+
+    // prints error if made it here
+    printf("ERROR: Failed to exec %s\n", argv[0]);
+  }
   
+  
+  // temp variables
+  node * nodeIter = commandList->head;
+  node * next;
+  
+  // frees 1D linked list
+  while(nodeIter != NULL){
+    next = nodeIter->next;
+    free(nodeIter);
+    nodeIter = next;
+  }
 }
 
 // checks if a string is a pipable builtin function

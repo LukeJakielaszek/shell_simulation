@@ -204,7 +204,7 @@ void checkCommand(llist1 * commandSet, int * syntaxFlag, int pipIndex,
   for(i = 0; i < commandSet->size; i++){
     // gets word in pipesection
     char * word = get1(commandSet, i);
-
+    
     char * nextWord;
 
     // gets next word if it exists
@@ -226,6 +226,11 @@ void checkCommand(llist1 * commandSet, int * syntaxFlag, int pipIndex,
     if(strcmp(word, "<") == 0){
       // looks for in redirection
       redirectInFlag++;
+
+      if(i == 0){
+	printf("ERROR: Input redirect detected as first index in command.\n");
+	*syntaxFlag = 1;
+      }
 
       // if input redirect occurs after a pipe
       if(pipIndex > 0){
@@ -256,6 +261,11 @@ void checkCommand(llist1 * commandSet, int * syntaxFlag, int pipIndex,
       // looks for output redirection
       redirectOutFlag++;
 
+      if(i == 0){
+	printf("ERROR: Output redirect detected as first index in command.\n");
+	*syntaxFlag = 1;
+      }
+      
       // checks if an output redirect occurs before a pipe
       if(pipIndex != commandLen-1){
 	printf("ERROR: Output redirect detected before final command.\n");
