@@ -41,8 +41,8 @@ char * readLine(int * shouldWait){
 
   // checks if program should wait
   if(buffer[lenRead-1] == '&'){
-    // sets shouldwait to true
-    *shouldWait = 1;
+    // sets shouldwait to false
+    *shouldWait = 0;
     
     // overwrites wait char
     buffer[lenRead-1] = '\0';

@@ -44,8 +44,8 @@ int main(int argc, char ** argv, char **environ){
 
   // simulation loop
   while(1){
-    // defaults program to not wait
-    int shouldWait = 0;
+    // defaults program to wait
+    int shouldWait = 1;
     
     char *PWD = getenv("PWD");
 
