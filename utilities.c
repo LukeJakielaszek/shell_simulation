@@ -95,9 +95,11 @@ void redirectInput(char * newInput){
 // changes the output stream of current process to specified file descriptor
 void redirectOutput(char * newOutput){
   int fd;
+
+  printf("new output [%s]", newOutput);
   
   // opens new input file, checks for success
-  if((fd = open(newOutput, O_WRONLY|O_CREAT|S_IRWXU|S_IRWXG|S_IRWXO)) < 0){
+  if((fd = open(newOutput, O_WRONLY|O_CREAT|O_TRUNC, 0644)) < 0){
     printf("ERROR: Failed to open %s.\n", newOutput);
     exit(EXIT_FAILURE);
   }
@@ -114,7 +116,7 @@ void redirectOutputCat(char * newOutput){
   int fd;
   
   // opens new input file, checks for success
-  if((fd = open(newOutput, O_WRONLY|O_APPEND|O_CREAT|S_IRWXU|S_IRWXG|S_IRWXO))
+  if((fd = open(newOutput, O_WRONLY|O_APPEND|O_CREAT, 0644))
      < 0){
     printf("ERROR: Failed to open %s.\n", newOutput);
     exit(EXIT_FAILURE);

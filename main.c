@@ -135,17 +135,18 @@ void firstCommand(llist2 * userInputList, int shouldWait){
 
       // waits for the specific child to finish
       do{
+	// trys to wait to child to finish
 	pid = waitpid(temp, &status, WNOHANG);
 
+	// checks wait fail
 	if(pid == -1){
 	  printf("ERROR: Failed to wait.\n");
 	  exit(EXIT_FAILURE);
 	}
 
+	// sleep for half a second to not waste cpu time
 	sleep(0.5);
       }while(pid != temp);
-      
-      printf("\nFinished waiting %d\n", pid);
     }
   }
 }
@@ -241,8 +242,6 @@ void pipingRec(llist2 * userInputList){
 
 // processes a single pipe's commands
 void processCommand(llist1 * commandList){
-  printList1(commandList);
-  
   int i = 0;
 
   //store size
@@ -278,6 +277,7 @@ void processCommand(llist1 * commandList){
     redirectInput(get1(commandList, inIndex+1));
   }
 
+  
   // finds where argv for executables ends
   if(end-1 > outIndex && outIndex > 0){
     end = outIndex;
