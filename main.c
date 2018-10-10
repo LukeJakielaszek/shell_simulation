@@ -19,6 +19,15 @@
 // holds terminal file descriptor
 int savedStdOut;
 
+// holds a global env
+char ** env;
+
+// holds line for echo
+char line[100];
+
+// helpfile path
+char *helpFile = "help.md";
+
 // prototypes
 void firstCommand(llist2 * userInputList, int shouldWait);
 void pipingRec(llist2 * userInputList);
@@ -26,6 +35,8 @@ void processCommand(llist1 * commandList);
 int isBuiltIn(char * command);
 
 int main(int argc, char ** argv, char **environ){
+  env = environ;
+  
   // change input stream to file if requested
   if(argc == 2){
     // store new file descriptor
@@ -55,6 +66,9 @@ int main(int argc, char ** argv, char **environ){
 
     // reads user input
     char *inputLine = readLine(&shouldWait);
+    
+    // store line for echo
+    strcpy(line, inputLine);
 
     // processes input
     if(strlen(inputLine) == 0){
@@ -88,6 +102,10 @@ int main(int argc, char ** argv, char **environ){
 	if(strcmp(get1(temp, 0), "cd") == 0){
 	  if(temp->size == 2){
 	    changeDirectory(PWD, get1(temp, 1));
+	    continue;
+	  }else if(temp->size == 1){
+	    printf("\n");
+	    continue;
 	  }else{
 	    printf("ERROR: Invalid arguments for cd.\n");
 	    continue;
@@ -95,6 +113,7 @@ int main(int argc, char ** argv, char **environ){
 	}
       }
 
+      // branches from main process and performs piping/redirection
       firstCommand(pipeSections, shouldWait);
     }
   }
@@ -307,17 +326,56 @@ void processCommand(llist1 * commandList){
   // runs command
   if(strcmp(argv[0], "dir") == 0){
     // command is builtin dir function
-    printf("dir\n");
+
+    // checks if correct num params are entered
+    if(end > 2){
+      printf("ERROR: Dir takes one or zero parameters.\n");
+      exit(EXIT_FAILURE);
+    }else if(end == 1){
+      // defaults to current directory
+      dir(".");
+    }else{
+      // dirs desired directory
+      dir(argv[1]);
+    }
   }else if(strcmp(argv[0], "environ") == 0){
     // command is builtin environ function
-    printf("envrion\n");
+
+    // prints environ
+    if(end > 1){
+      // checks for invalid params
+      printf("ERROR: Env does not take parameters.\n");
+      exit(EXIT_FAILURE);
+    }else{
+      // prints environ
+      printEnv(env);
+    }
   }else  if(strcmp(argv[0], "echo") == 0){
     // command is builtin echo function
-    printf("echo\n");
+    if(end > 1){
+      // prints line passed in by user
+      echoLine(line);
+    }else{
+      // print whats in std in
+      echoInput();
+    }
   }else  if(strcmp(argv[0], "help") == 0){
     // command is builtin help function
-    printf("help\n");
+    help(helpFile);
+
+    printf("\n");
   }else{
+    // temp variables
+    node * nodeIter = commandList->head;
+    node * next;
+    
+    // frees 1D linked list
+    while(nodeIter != NULL){
+      next = nodeIter->next;
+      free(nodeIter);
+      nodeIter = next;
+    }
+
     // the program is an executable
     execvp(argv[0], argv);
 

@@ -17,6 +17,67 @@ void changeDirectory(char * PWD, const char * newDir);
 void dir(char * path);
 void redirectOutput(char * newInput);
 void redirectOutputCat(char * newOutput);
+void printEnv(char ** environment);
+void echoLine(char * line);
+void echoInput();
+void help(char * helpFile);
+
+void help(char * helpFile){
+  redirectInput(helpFile);
+  
+  size_t bufferSize = BUFSIZE;
+  char * buffer = (char*)malloc(sizeof(char)*bufferSize);
+
+  // checks for malloc success
+  if(buffer == NULL){
+    printf("ERROR: Command Line Parsing buffer failed to malloc\n");
+    exit(-1);
+  }
+
+  while(getline(&buffer, &bufferSize, stdin) > 0){
+    printf("%s", buffer);
+  }
+}
+
+void echoInput(){
+  size_t bufferSize = BUFSIZE;
+  char * buffer = (char*)malloc(sizeof(char)*bufferSize);
+
+  // checks for malloc success
+  if(buffer == NULL){
+    printf("ERROR: Command Line Parsing buffer failed to malloc\n");
+    exit(-1);
+  }
+
+  while(getline(&buffer, &bufferSize, stdin) > 0){
+    printf("%s", buffer);
+  }
+}
+
+// echos a line from terminal
+void echoLine(char * line){
+  // prints command line line
+  int i = 4;
+  int len = strlen(line);
+
+  // print everything after echo
+  for(i = 5; i < len; i++){
+    printf("%c", line[i]);
+  }
+
+  printf("\n");
+}
+
+// prints environmnet to std out
+void printEnv(char ** environment){
+  int i = 0;
+
+  // loops through environ
+  while(environment[i] != NULL){
+    printf("%s\n", environment[i]);
+    i++;
+  }
+}
 
 void dir(char * path){
   // opens desired directory
@@ -37,7 +98,7 @@ void dir(char * path){
   // reads directory, append to retchar
   while((fd = readdir(dir)) != NULL){
     // copy filename into retchar
-    printf("[%s]\n", fd->d_name);
+    printf("%s\n", fd->d_name);
   }
 
   closedir(dir);
@@ -96,8 +157,6 @@ void redirectInput(char * newInput){
 void redirectOutput(char * newOutput){
   int fd;
 
-  printf("new output [%s]", newOutput);
-  
   // opens new input file, checks for success
   if((fd = open(newOutput, O_WRONLY|O_CREAT|O_TRUNC, 0644)) < 0){
     printf("ERROR: Failed to open %s.\n", newOutput);

@@ -2,8 +2,8 @@ CFLAGS = -g
 
 objects = main.o llist.o parsing.o utilities.o
 
-test : $(objects)
-	cc -o test $(objects) $(CFLAGS)
+myshell : $(objects)
+	cc -o myshell $(objects) $(CFLAGS)
 
 main.o : llist.h parsing.h utilities.h
 

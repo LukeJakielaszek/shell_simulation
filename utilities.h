@@ -20,5 +20,9 @@ void changeDirectory(char * PWD, const char * newDir);
 void dir(char * path);
 void redirectOutput(char * newInput);
 void redirectOutputCat(char * newOutput);
+void printEnv(char ** environment);
+void echoLine(char * line);
+void echoInput();
+void help(char * helpFile);
 
 #endif /** UTILITIES_H */
