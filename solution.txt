@@ -1,0 +1,66 @@
+Problem Solution / Implementation:
+	First, I checked for background execution '&' at the end of the input.
+	Then, I parsed user input into a 2-dimensional linked list where
+	each index of the first dimension of the list is each pipe delimineted
+	command set. The inner index of the linked list is each white space
+	delimineted command.
+
+	For Example:
+	    prog1 < in.txt | prog2 > out.txt
+
+	    ll[0][0] == "prog1"
+	    ll[0][1] == "<"
+	    ll[0][2] == "in.txt"
+	    ll[1][0] == "prog2"
+	    ll[1][1] == ">"
+	    ll[1][2] == "out.txt"
+
+	I then checked for any syntax errors or logic errors in user input.
+	I also checked for cd, clr, and quit since these are not pipable.
+
+	Next, I seperated the main process from the command processes by
+	forking within firstCommand(). firstCommand() then checks if there is
+	piping in the linked list. If not, it calls processCommand() to
+	process the command only command. Otherwise, it recursively
+	sets up piping through pipingRec().
+
+	pipingRec() set up a pipe between the parent and child process, popped
+	a command from the 2-dimensional list, then called fork. The child
+	process the processed the command through processCommand(). The parent
+	checks if the 2D linked list still has more piping and if so, calls
+	pipingRec(). Otherwise, it restores the output file descriptor and
+	calls processCommand().
+
+	processCommand() first checks for redirects. If it detects any, it
+	redirects input and output accordingly. Next it checks if the command
+	if built-in, if so it calls the corresponding builtin function with
+	desired arguments. If not a built in, it sets up the executable's
+	argv and calls execvp on in the desired executable.
+
+	This process repeats until quit is entered.
+
+Program documentation:
+	The readme file goes over the basic function of the builtin commands
+	and identifies which are pipable/redirectable. It also discusses
+	redirection and describes the differences between > < and >>.
+	A description of how piping affects input and output streams is also
+	provided. The functionality of background execution is also discussed.
+	Also, the environment and its variables are described, identifying how
+	they are stored and what they represent. Finally a brief overview of
+	how executables are handled is given.
+
+Testing Methods:
+	Testing was initially performed on linked list parsing and syntax/logic
+	checking for the user input. Syntax/logic checking was also edited
+	throughout development as I thought of possible errors. Next,
+	unpiped/unredirected builtins were checked for correctness.
+	After that, piped executables and builtins were checked. Background
+	execution was also tested simultaneously. The creation of background
+	execution caused me to switch from having the child recursively pipe
+	and the parent execute commands to having the parent recursivley
+	pipe and the child execute individual commands. File redirection was
+	then tested for accuracy. Finally, the implementation of reading
+	from a batch file was tested against known outputs without
+	the batch file. This batch file test caused me to switch from using
+	scanf and gets to C's getline. 
+	

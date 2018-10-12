@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#define BUFSIZE 50
+#define BUFSIZE 150
 
 // prototypes
 void redirectInput(char * newInput);
@@ -23,7 +23,12 @@ void echoInput();
 void help(char * helpFile);
 
 void help(char * helpFile){
-  redirectInput(helpFile);
+  // saves input file descriptor
+  int fd;
+
+  FILE * file;
+
+  file = fopen(helpFile, "r");
   
   size_t bufferSize = BUFSIZE;
   char * buffer = (char*)malloc(sizeof(char)*bufferSize);
@@ -34,10 +39,37 @@ void help(char * helpFile){
     exit(-1);
   }
 
+  int i = 0;
   
-  
-  while(getline(&buffer, &bufferSize, stdin) > 0){
+  while(fgets(buffer, BUFSIZE, file ) != NULL){
     printf("%s", buffer);
+    
+    // implementation of more command
+    if(i % 34 == 0 && i != 0){
+      // checks if number of lines printed is the screen height
+
+      // message to print to user
+      char * message = "Enter more to see next page (anything else exits help)> \n";
+
+      // writes message to terminal
+      write(STDOUT_FILENO, message, strlen(message));
+
+      // gets line
+      getline(&buffer, &bufferSize, stdin);
+
+      // remove newline
+      buffer[strlen(buffer)-1] = '\0';
+      
+      if(strcmp(buffer, "more") == 0){
+	// continue to next page
+      }else{
+	// exit help screen
+	exit(EXIT_FAILURE);
+      }
+    }
+
+    // increments i
+    ++i;
   }
 }
 

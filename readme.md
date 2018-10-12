@@ -59,7 +59,8 @@ DESCRIPTION
 		Usage: echo [argv] or echo or echo < filename
 
 	    help
-	        Displays this readme file.
+	        Displays this readme file page by page. Enter more to continue
+		onto the next page.
 
 		Usage: help	    
 
