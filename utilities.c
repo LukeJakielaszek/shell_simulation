@@ -34,6 +34,8 @@ void help(char * helpFile){
     exit(-1);
   }
 
+  
+  
   while(getline(&buffer, &bufferSize, stdin) > 0){
     printf("%s", buffer);
   }

@@ -26,7 +26,7 @@ char ** env;
 char line[100];
 
 // helpfile path
-char *helpFile = "help.md";
+char *helpFile = "readme.md";
 
 // prototypes
 void firstCommand(llist2 * userInputList, int shouldWait);

@@ -9,4 +9,4 @@ main.o : llist.h parsing.h utilities.h
 
 .PHONY : clean
 clean :
-	rm test $(objects)
+	rm myshell $(objects)
