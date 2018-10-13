@@ -24,12 +24,15 @@ void help(char * helpFile);
 
 void help(char * helpFile){
   // saves input file descriptor
-  int fd;
-
-  FILE * file;
-
-  file = fopen(helpFile, "r");
+  int savedInput;
   
+  // saves std out, checks for success
+  if((savedInput=dup(STDIN_FILENO)) == -1){
+    printf("ERROR: Failed to save std_out for main process.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  // creates a buffer
   size_t bufferSize = BUFSIZE;
   char * buffer = (char*)malloc(sizeof(char)*bufferSize);
 
@@ -39,37 +42,80 @@ void help(char * helpFile){
     exit(-1);
   }
 
-  int i = 0;
-  
-  while(fgets(buffer, BUFSIZE, file ) != NULL){
-    printf("%s", buffer);
-    
-    // implementation of more command
-    if(i % 34 == 0 && i != 0){
-      // checks if number of lines printed is the screen height
+  // redirects input to help file
+  redirectInput(helpFile);
 
-      // message to print to user
-      char * message = "Enter more to see next page (anything else exits help)> \n";
+  int line = 0;
+  off_t offset = 0;
+  // reads help file
+  while(getline(&buffer, &bufferSize, stdin) >= 0){
+    int lenRead = 0;
 
-      // writes message to terminal
-      write(STDOUT_FILENO, message, strlen(message));
+    // finds size of read line
+    while(buffer[lenRead] != '\n'){
+      lenRead++;
+    }
 
-      // gets line
-      getline(&buffer, &bufferSize, stdin);
+    // increments offset bytes
+    offset+=lenRead+1;
 
-      // remove newline
-      buffer[strlen(buffer)-1] = '\0';
+    // writes line from file
+    write(STDOUT_FILENO, buffer, strlen(buffer));
+
+    // if one page is printed to terminal
+    if(line % 35 == 0 && line != 0){
+      char x[] = "Enter m to continue to next screen. Anything else quits> ";
+
+      // write instructions for user
+      write(STDOUT_FILENO, x, strlen(x));
       
-      if(strcmp(buffer, "more") == 0){
-	// continue to next page
-      }else{
-	// exit help screen
+      // restore terminal input
+      if(dup2(savedInput, STDIN_FILENO) < 0){
+	printf("ERROR: Failed to restore output stream to terminal.\n");
 	exit(EXIT_FAILURE);
+      }
+
+      // read user response
+      read(STDIN_FILENO, buffer, BUFSIZE);
+
+      // finds end of user response
+      int i = 0;
+      while(buffer[i] != '\n'){
+	++i;
+      }
+
+      // truncates extra info read
+      buffer[i] = '\0';
+
+      // help file descriptor
+      int fd;
+      
+      // opens help file, checks for success
+      if((fd = open(helpFile, O_RDONLY)) < 0){
+	printf("ERROR: Failed to open %s.\n", helpFile);
+	exit(EXIT_FAILURE);
+      }
+      
+      // restore help file stream
+      if(dup2(fd, STDIN_FILENO) < 0){
+	printf("ERROR: Failed to swap input stream to %s.\n", helpFile);
+	exit(EXIT_FAILURE);
+      }
+
+      // set helpfile offset
+      lseek(fd, offset, SEEK_SET);
+
+      // checks if m was entered by user
+      if(strcmp(buffer, "m") == 0){
+	// continues to next screen of input
+      }else{
+	// exits if m was not entered
+	exit(EXIT_SUCCESS);
       }
     }
 
-    // increments i
-    ++i;
+    // increments line count
+    ++line;
   }
 }
 
